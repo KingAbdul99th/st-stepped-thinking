@@ -217,8 +217,8 @@ function registerCommonSettingListeners() {
     $('#stepthink_mode').on('input', onSwitchThinkingMode);
 
     $('#stepthink_is_enabled').on('input', onCheckboxInput('is_enabled'));
-	$("#stepthink_is_enabled").on("change", onConnectionProfileSelectChange);
-	$("#stepthink_is_enabled").on("change", onCompletionPresetSelectChange);
+	$("#stepthink_connection_profile").on("change", onConnectionProfileSelectChange);
+	$("#stepthink_completion_preset").on("change", onCompletionPresetSelectChange);
     $('#stepthink_is_shutdown').on('input', onCheckboxInput('is_shutdown'));
     $('#stepthink_is_wian_skipped').on('input', onCheckboxInput('is_wian_skipped'));
     $('#stepthink_is_thoughts_spoiler_open').on('input', onCheckboxInput('is_thoughts_spoiler_open'));
