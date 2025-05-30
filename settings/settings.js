@@ -389,8 +389,8 @@ function initializeOverridesDropdowns() {
 		consol.log("Selected profile:", { actualSelectedProfile, extensionSettings });
 		updateCompletionPresetsDropdown();
 	} catch(e) {
-		error(e)
-		toastr.error('Failed to initialize overrides presets');
+		consol.log(e)
+		toastr.consol.log('Failed to initialize overrides presets');
 
 	}
 	saveSettingsDebounced();
