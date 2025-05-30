@@ -412,12 +412,12 @@ async function generateThoughts() {
 	const preselectedProfile = connectionManagerSettings.profiles.find(x => x.id === connectionManagerSettings.selectedProfile).name;
 	try {
 		if (extensionSettings.selectedProfile !== "current") {
-			debug("overriding connection profile", extensionSettings.selectedProfile);
+			console.log("overriding connection profile", extensionSettings.selectedProfile);
 			await ctx.executeSlashCommandsWithOptions(`/profile ${extensionSettings.selectedProfile}`);
 		}
 	
 		if (extensionSettings.selectedCompletionPreset !== "current") {
-			debug("overriding completion preset", extensionSettings.selectedCompletionPreset);
+			console.log("overriding completion preset", extensionSettings.selectedCompletionPreset);
 			await ctx.executeSlashCommandsWithOptions(`/preset ${extensionSettings.selectedCompletionPreset}`);
 		}
 
@@ -439,12 +439,12 @@ async function generateThoughts() {
         }
 
 		if (extensionSettings.selectedProfile !== "current") {
-			debug("removing connection profile override back to ", preselectedProfile)
+			console.log("removing connection profile override back to ", preselectedProfile)
 			await ctx.executeSlashCommandsWithOptions(`/profile ${preselectedProfile}`);
 		}
 
 		if (extensionSettings.selectedCompletionPreset !== "current") {
-			debug("removing completion preset override back to ", preselectedPreset)
+			console.log("removing completion preset override back to ", preselectedPreset)
 			await ctx.executeSlashCommandsWithOptions(`/preset ${preselectedPreset}`);
 		}
 
@@ -455,7 +455,7 @@ async function generateThoughts() {
         }
 
 	} catch (e) {
-		error("Failed to generate", e);
+		console.log("Failed to generate", e);
 		toastr.error("Failed to generate. Make sure your selected connection profile and completion preset are valid and working");
 	}
 }
