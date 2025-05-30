@@ -390,8 +390,7 @@ function initializeOverridesDropdowns() {
 		updateCompletionPresetsDropdown();
 	} catch(e) {
 		console.log(e)
-		toastr.console.log('Failed to initialize overrides presets');
-
+		toastr.log('Failed to initialize overrides presets');
 	}
 	saveSettingsDebounced();
 }
