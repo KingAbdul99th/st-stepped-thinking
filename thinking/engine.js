@@ -413,12 +413,12 @@ async function generateThoughts() {
 	try {
 		if (settings.selectedProfile !== "current") {
 			console.log("overriding connection profile", settings.selectedProfile);
-			await ctx.executeSlashCommandsWithOptions(`/profile ${settings.selectedProfile}`);
+			await context.executeSlashCommandsWithOptions(`/profile ${settings.selectedProfile}`);
 		}
 	
 		if (settings.selectedCompletionPreset !== "current") {
 			console.log("overriding completion preset", settings.selectedCompletionPreset);
-			await ctx.executeSlashCommandsWithOptions(`/preset ${settings.selectedCompletionPreset}`);
+			await context.executeSlashCommandsWithOptions(`/preset ${settings.selectedCompletionPreset}`);
 		}
 
         if (settings.is_thinking_popups_enabled) {
@@ -440,12 +440,12 @@ async function generateThoughts() {
 
 		if (settings.selectedProfile !== "current") {
 			console.log("removing connection profile override back to ", preselectedProfile)
-			await ctx.executeSlashCommandsWithOptions(`/profile ${preselectedProfile}`);
+			await context.executeSlashCommandsWithOptions(`/profile ${preselectedProfile}`);
 		}
 
 		if (settings.selectedCompletionPreset !== "current") {
 			console.log("removing completion preset override back to ", preselectedPreset)
-			await ctx.executeSlashCommandsWithOptions(`/preset ${preselectedPreset}`);
+			await context.executeSlashCommandsWithOptions(`/preset ${preselectedPreset}`);
 		}
 
         toastr.clear(toastThinking);
