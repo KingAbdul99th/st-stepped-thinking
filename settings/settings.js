@@ -127,6 +127,8 @@ export const thoughtPrefixInjectionModes = {
 
 const defaultCommonSettings = {
     'shown_popup_version': lastPopupVersion,
+    'selectedProfile': 'current',
+    'selectedCompletionPreset': 'current',
     'is_shutdown': false,
     'is_enabled': true,
     'is_wian_skipped': false,
