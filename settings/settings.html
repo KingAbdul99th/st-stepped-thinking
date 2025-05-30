@@ -20,6 +20,27 @@
                     </div>
                 </div>
             </div>
+            
+			<!-- Connection Profile -->
+			<div class="stepthink-block m-b-1 m-t-1">
+				<label for="stepthink_connection_profile">Connection Profile</label><br />
+				<small>Override connection profile for stepthink generation:</small><br />
+				<select id="stepthink_connection_profile" class="text_pole">
+					<option value="current">Same as current</option>
+				</select>
+			</div>
+
+			<!-- Completion Preset -->
+			<div class="stepthink-block m-b-1 m-t-1">
+				<label for="stepthink_completion_preset">Completion preset</label><br />
+				<small>
+					Override completion preset for stepthink generation: <br />
+					(For Chat Completion Profiles, Make sure the preset has the same Chat completion Source as the profile)
+				</small><br />
+				<select id="stepthink_completion_preset" class="text_pole">
+					<option value="current">Same as current</option>
+				</select>
+			</div>
 
             <div class="flex-container alignItemsCenter">
                 Thinking mode:

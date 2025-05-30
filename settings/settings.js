@@ -174,6 +174,7 @@ function loadCommonSettings() {
     renderAvailableThinkingModes();
     $(`#stepthink_mode option[value="${settings.mode}"]`).prop('selected', 'true');
     activateThinkingMode(settings.mode);
+	initializeOverridesDropdowns();
 
     $('#stepthink_regexp_to_sanitize').val(settings.regexp_to_sanitize);
     $('#stepthink_system_character_name_template').val(settings.system_character_name_template);
@@ -214,6 +215,8 @@ function registerCommonSettingListeners() {
     $('#stepthink_mode').on('input', onSwitchThinkingMode);
 
     $('#stepthink_is_enabled').on('input', onCheckboxInput('is_enabled'));
+	$("#stepthink_is_enabled").on("change", onConnectionProfileSelectChange);
+	$("#stepthink_is_enabled").on("change", onCompletionPresetSelectChange);
     $('#stepthink_is_shutdown').on('input', onCheckboxInput('is_shutdown'));
     $('#stepthink_is_wian_skipped').on('input', onCheckboxInput('is_wian_skipped'));
     $('#stepthink_is_thoughts_spoiler_open').on('input', onCheckboxInput('is_thoughts_spoiler_open'));
@@ -261,6 +264,13 @@ function registerCommonSettingListeners() {
             $('#stepthink_thoughts_placeholder_end').val(defaultCommonSettings.thoughts_placeholder.end).trigger('input');
         },
     );
+
+    const {
+		eventSource,
+		event_types,
+	} = getContext();
+
+	eventSource.on(event_types.CONNECTION_PROFILE_LOADED, onMainSettingsConnectionProfileChange);
 }
 
 /**
@@ -327,6 +337,164 @@ function onIntegerTextareaInput(settingName) {
         saveSettingsDebounced();
     };
 }
+
+// #region Connection Profile Override
+
+function getConnectionProfiles() {
+	const ctx = getContext();
+	const connectionProfileNames = ctx.extensionSettings.connectionManager.profiles.map(x => x.name);
+	return connectionProfileNames;
+}
+
+function updateConnectionProfileDropdown() {
+	const connectionProfileSelect = $("#stepthink_connection_profile");
+	const connectionProfiles = getConnectionProfiles();
+	debug("connections profiles found", connectionProfiles);
+	connectionProfileSelect.empty();
+	connectionProfileSelect.append($("<option>").val("current").text("Same as current"));
+	for (const profileName of connectionProfiles) {
+		const option = $("<option>").val(profileName).text(profileName);
+
+		if (profileName === extensionSettings.selectedProfile) {
+			option.attr("selected", "selected");
+		}
+
+		connectionProfileSelect.append(option);
+	}
+}
+
+function initializeOverridesDropdowns() {
+	try {
+		const ctx = getContext();
+		const connectionManager = ctx.extensionSettings.connectionManager;
+		if(connectionManager.profiles.length === 0 && extensionSettings.enabled) {
+			toastr.warning("No saved connection profiles. stepthink connection & completion presets overrides won't work without at least one saved profile")
+			return;
+		}
+		updateConnectionProfileDropdown();
+	
+		let actualSelectedProfile;
+		if(extensionSettings.selectedProfile === 'current') {
+			actualSelectedProfile = connectionManager.profiles.find(x => x.id === connectionManager.selectedProfile);
+			extensionSettings.selectedProfileApi = actualSelectedProfile.api;
+			extensionSettings.selectedProfileMode = actualSelectedProfile.mode;
+	
+		} else {
+			actualSelectedProfile = connectionManager.profiles.find(x => x.name === extensionSettings.selectedProfile);
+			extensionSettings.selectedProfileApi = actualSelectedProfile.api;
+			extensionSettings.selectedProfileMode = actualSelectedProfile.mode;
+			}
+		debug("Selected profile:", { actualSelectedProfile, extensionSettings });
+		updateCompletionPresetsDropdown();
+	} catch(e) {
+		error(e)
+		toastr.error('Failed to initialize overrides presets');
+
+	}
+	saveSettingsDebounced();
+}
+
+function onConnectionProfileSelectChange() {
+	const selectedProfile = $(this).val();
+	extensionSettings.selectedProfile = selectedProfile;
+	const ctx = getContext();
+	const connectionManager = ctx.extensionSettings.connectionManager
+
+	let actualSelectedProfile;
+
+	if(selectedProfile === 'current') {
+		actualSelectedProfile = connectionManager.profiles.find(x => x.id === connectionManager.selectedProfile);
+		extensionSettings.selectedProfileApi = actualSelectedProfile.api;
+		extensionSettings.selectedProfileMode = actualSelectedProfile.mode;
+
+	} else {
+		actualSelectedProfile = connectionManager.profiles.find(x => x.name === selectedProfile);
+		extensionSettings.selectedProfileApi = actualSelectedProfile.api;
+		extensionSettings.selectedProfileMode = actualSelectedProfile.mode;
+	}
+
+
+	debug("Selected profile:", { selectedProfile, extensionSettings });
+	updateCompletionPresetsDropdown();
+	saveSettingsDebounced();
+}
+
+function onMainSettingsConnectionProfileChange() {
+	if(extensionSettings.selectedProfile === "current") {
+		debug("Connection profile changed. Updating presets drop down");
+		extensionSettings.selectedCompletionPreset = "current";
+		updateCompletionPresetsDropdown();
+	}
+}
+
+// #endregion
+
+// #region Completion Preset Override
+
+function getCompletionPresets() {
+	const ctx = getContext();
+	let validPresetNames = [];
+
+	if(extensionSettings.selectedProfileMode === "cc") {
+		const presetManager = ctx.getPresetManager('openai');
+		const presets = presetManager.getPresetList().presets;
+		const presetNames = presetManager.getPresetList().preset_names;
+
+		let presetsDict = {};
+		for(const x in presetNames) presetsDict[x] = presets[presetNames[x]];
+		debug('available presetNames', presetNames);
+		debug('extensionSettings.selectedProfileApi', extensionSettings.selectedProfileApi);
+		debug('presetsDict', presetsDict);
+		for(const x in presetsDict) {
+			if(presetsDict[x].chat_completion_source === extensionSettings.selectedProfileApi) {
+				validPresetNames.push(x);
+			}
+			else if (presetsDict[x].chat_completion_source === ctx.CONNECT_API_MAP[extensionSettings.selectedProfileApi]?.source) {
+				validPresetNames.push(x)
+			}
+		}
+		debug('validPresetNames', validPresetNames);
+	} else {
+		const presetManager = ctx.getPresetManager('textgenerationwebui');
+		const presetNames = presetManager.getPresetList().preset_names;
+
+		validPresetNames = presetNames;
+		if (Array.isArray(presetNames)) validPresetNames = presetNames;
+		else validPresetNames = Object.keys(validPresetNames);
+	}
+
+	return validPresetNames;
+}
+
+function updateCompletionPresetsDropdown() {
+	const completionPresetsSelect = $("#stepthink_completion_preset");
+	const completionPresets = getCompletionPresets();
+	debug("completion presets found", completionPresets);
+	completionPresetsSelect.empty();
+	completionPresetsSelect.append($("<option>").val("current").text("Use connection profile Default"));
+	for (const presetName of completionPresets) {
+		const option = $("<option>").val(presetName).text(presetName);
+
+		if (presetName === extensionSettings.selectedCompletionPreset) {
+			option.attr("selected", "selected");
+		}
+
+		completionPresetsSelect.append(option);
+	}
+}
+
+function onCompletionPresetSelectChange() {
+	const selectedCompletionPreset = $(this).val();
+	extensionSettings.selectedCompletionPreset = selectedCompletionPreset;
+
+	debug("Selected completion preset:", { selectedCompletionPreset, extensionSettings });
+
+	setSettingsInitialValues();
+	saveSettingsDebounced();
+}
+
+// #endregion
+
 
 /**
  * @param {...string} settingNames

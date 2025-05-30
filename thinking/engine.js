@@ -406,29 +406,58 @@ async function generateThoughtsWithDisabledInput(textarea) {
  */
 async function generateThoughts() {
     const context = getContext();
+	const presetManager = context.getPresetManager();
+	const connectionManagerSettings = context.extensionSettings.connectionManager;
+	const preselectedPreset = presetManager.getSelectedPresetName();
+	const preselectedProfile = connectionManagerSettings.profiles.find(x => x.id === connectionManagerSettings.selectedProfile).name;
+	try {
+		if (extensionSettings.selectedProfile !== "current") {
+			debug("overriding connection profile", extensionSettings.selectedProfile);
+			await ctx.executeSlashCommandsWithOptions(`/profile ${extensionSettings.selectedProfile}`);
+		}
+	
+		if (extensionSettings.selectedCompletionPreset !== "current") {
+			debug("overriding completion preset", extensionSettings.selectedCompletionPreset);
+			await ctx.executeSlashCommandsWithOptions(`/preset ${extensionSettings.selectedCompletionPreset}`);
+		}
 
-    if (settings.is_thinking_popups_enabled) {
-        const toastThinkingMessage = context.substituteParams('{{char}} is thinking...');
-        toastThinking = toastr.info(toastThinkingMessage, 'Stepped Thinking', { timeOut: 0, extendedTimeOut: 0 });
-    }
+        if (settings.is_thinking_popups_enabled) {
+            const toastThinkingMessage = context.substituteParams('{{char}} is thinking...');
+            toastThinking = toastr.info(toastThinkingMessage, 'Stepped Thinking', { timeOut: 0, extendedTimeOut: 0 });
+        }
 
-    const prompts = currentGenerationPlan.getThinkingPrompts();
-    for (let i = 0; i < prompts.length; i++) {
-        if (prompts[i].prompt) {
-            const generatedThought = await generateCharacterThought(prompts[i].prompt);
-            await putCharactersThoughts(generatedThought, prompts[i]);
+        const prompts = currentGenerationPlan.getThinkingPrompts();
+        for (let i = 0; i < prompts.length; i++) {
+            if (prompts[i].prompt) {
+                const generatedThought = await generateCharacterThought(prompts[i].prompt);
+                await putCharactersThoughts(generatedThought, prompts[i]);
 
-            if (prompts[i + 1]?.prompt) {
-                await generationDelay();
+                if (prompts[i + 1]?.prompt) {
+                    await generationDelay();
+                }
             }
         }
-    }
 
-    toastr.clear(toastThinking);
-    toastThinking = null;
-    if (settings.is_thinking_popups_enabled) {
-        toastr.success('Done!', 'Stepped Thinking', { timeOut: 2000 });
-    }
+		if (extensionSettings.selectedProfile !== "current") {
+			debug("removing connection profile override back to ", preselectedProfile)
+			await ctx.executeSlashCommandsWithOptions(`/profile ${preselectedProfile}`);
+		}
+
+		if (extensionSettings.selectedCompletionPreset !== "current") {
+			debug("removing completion preset override back to ", preselectedPreset)
+			await ctx.executeSlashCommandsWithOptions(`/preset ${preselectedPreset}`);
+		}
+
+        toastr.clear(toastThinking);
+        toastThinking = null;
+        if (settings.is_thinking_popups_enabled) {
+            toastr.success('Done!', 'Stepped Thinking', { timeOut: 2000 });
+        }
+
+	} catch (e) {
+		error("Failed to generate", e);
+		toastr.error("Failed to generate. Make sure your selected connection profile and completion preset are valid and working");
+	}
 }
 
 /**
