@@ -411,14 +411,14 @@ async function generateThoughts() {
 	const preselectedPreset = presetManager.getSelectedPresetName();
 	const preselectedProfile = connectionManagerSettings.profiles.find(x => x.id === connectionManagerSettings.selectedProfile).name;
 	try {
-		if (extensionSettings.selectedProfile !== "current") {
-			console.log("overriding connection profile", extensionSettings.selectedProfile);
-			await ctx.executeSlashCommandsWithOptions(`/profile ${extensionSettings.selectedProfile}`);
+		if (settings.selectedProfile !== "current") {
+			console.log("overriding connection profile", settings.selectedProfile);
+			await ctx.executeSlashCommandsWithOptions(`/profile ${settings.selectedProfile}`);
 		}
 	
-		if (extensionSettings.selectedCompletionPreset !== "current") {
-			console.log("overriding completion preset", extensionSettings.selectedCompletionPreset);
-			await ctx.executeSlashCommandsWithOptions(`/preset ${extensionSettings.selectedCompletionPreset}`);
+		if (settings.selectedCompletionPreset !== "current") {
+			console.log("overriding completion preset", settings.selectedCompletionPreset);
+			await ctx.executeSlashCommandsWithOptions(`/preset ${settings.selectedCompletionPreset}`);
 		}
 
         if (settings.is_thinking_popups_enabled) {
@@ -438,12 +438,12 @@ async function generateThoughts() {
             }
         }
 
-		if (extensionSettings.selectedProfile !== "current") {
+		if (settings.selectedProfile !== "current") {
 			console.log("removing connection profile override back to ", preselectedProfile)
 			await ctx.executeSlashCommandsWithOptions(`/profile ${preselectedProfile}`);
 		}
 
-		if (extensionSettings.selectedCompletionPreset !== "current") {
+		if (settings.selectedCompletionPreset !== "current") {
 			console.log("removing completion preset override back to ", preselectedPreset)
 			await ctx.executeSlashCommandsWithOptions(`/preset ${preselectedPreset}`);
 		}
