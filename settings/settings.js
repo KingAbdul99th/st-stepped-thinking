@@ -351,7 +351,7 @@ function getConnectionProfiles() {
 function updateConnectionProfileDropdown() {
 	const connectionProfileSelect = $("#stepthink_connection_profile");
 	const connectionProfiles = getConnectionProfiles();
-	consol.log("connections profiles found", connectionProfiles);
+	console.log("connections profiles found", connectionProfiles);
 	connectionProfileSelect.empty();
 	connectionProfileSelect.append($("<option>").val("current").text("Same as current"));
 	for (const profileName of connectionProfiles) {
@@ -386,11 +386,11 @@ function initializeOverridesDropdowns() {
 			extensionSettings.selectedProfileApi = actualSelectedProfile.api;
 			extensionSettings.selectedProfileMode = actualSelectedProfile.mode;
 			}
-		consol.log("Selected profile:", { actualSelectedProfile, extensionSettings });
+		console.log("Selected profile:", { actualSelectedProfile, extensionSettings });
 		updateCompletionPresetsDropdown();
 	} catch(e) {
-		consol.log(e)
-		toastr.consol.log('Failed to initialize overrides presets');
+		console.log(e)
+		toastr.console.log('Failed to initialize overrides presets');
 
 	}
 	saveSettingsDebounced();
@@ -416,14 +416,14 @@ function onConnectionProfileSelectChange() {
 	}
 
 
-	consol.log("Selected profile:", { selectedProfile, extensionSettings });
+	console.log("Selected profile:", { selectedProfile, extensionSettings });
 	updateCompletionPresetsDropdown();
 	saveSettingsDebounced();
 }
 
 function onMainSettingsConnectionProfileChange() {
 	if(extensionSettings.selectedProfile === "current") {
-		consol.log("Connection profile changed. Updating presets drop down");
+		console.log("Connection profile changed. Updating presets drop down");
 		extensionSettings.selectedCompletionPreset = "current";
 		updateCompletionPresetsDropdown();
 	}
@@ -444,9 +444,9 @@ function getCompletionPresets() {
 
 		let presetsDict = {};
 		for(const x in presetNames) presetsDict[x] = presets[presetNames[x]];
-		consol.log('available presetNames', presetNames);
-		consol.log('extensionSettings.selectedProfileApi', extensionSettings.selectedProfileApi);
-		consol.log('presetsDict', presetsDict);
+		console.log('available presetNames', presetNames);
+		console.log('extensionSettings.selectedProfileApi', extensionSettings.selectedProfileApi);
+		console.log('presetsDict', presetsDict);
 		for(const x in presetsDict) {
 			if(presetsDict[x].chat_completion_source === extensionSettings.selectedProfileApi) {
 				validPresetNames.push(x);
@@ -455,7 +455,7 @@ function getCompletionPresets() {
 				validPresetNames.push(x)
 			}
 		}
-		consol.log('validPresetNames', validPresetNames);
+		console.log('validPresetNames', validPresetNames);
 	} else {
 		const presetManager = ctx.getPresetManager('textgenerationwebui');
 		const presetNames = presetManager.getPresetList().preset_names;
@@ -471,7 +471,7 @@ function getCompletionPresets() {
 function updateCompletionPresetsDropdown() {
 	const completionPresetsSelect = $("#stepthink_completion_preset");
 	const completionPresets = getCompletionPresets();
-	consol.log("completion presets found", completionPresets);
+	console.log("completion presets found", completionPresets);
 	completionPresetsSelect.empty();
 	completionPresetsSelect.append($("<option>").val("current").text("Use connection profile Default"));
 	for (const presetName of completionPresets) {
@@ -489,7 +489,7 @@ function onCompletionPresetSelectChange() {
 	const selectedCompletionPreset = $(this).val();
 	extensionSettings.selectedCompletionPreset = selectedCompletionPreset;
 
-	consol.log("Selected completion preset:", { selectedCompletionPreset, extensionSettings });
+	console.log("Selected completion preset:", { selectedCompletionPreset, extensionSettings });
 
 	setSettingsInitialValues();
 	saveSettingsDebounced();
