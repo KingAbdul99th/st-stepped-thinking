@@ -457,6 +457,15 @@ async function generateThoughts() {
 	} catch (e) {
 		console.log("Failed to generate", e);
 		toastr.error("Failed to generate. Make sure your selected connection profile and completion preset are valid and working");
+        if (settings.selectedProfile !== "current") {
+			console.log("removing connection profile override back to ", preselectedProfile)
+			await context.executeSlashCommandsWithOptions(`/profile ${preselectedProfile}`);
+		}
+
+		if (settings.selectedCompletionPreset !== "current") {
+			console.log("removing completion preset override back to ", preselectedPreset)
+			await context.executeSlashCommandsWithOptions(`/preset ${preselectedPreset}`);
+		}
 	}
 }
 

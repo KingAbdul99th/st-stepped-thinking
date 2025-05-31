@@ -370,7 +370,6 @@ function initializeOverridesDropdowns() {
 		const ctx = getContext();
 		const connectionManager = ctx.extensionSettings.connectionManager;
 		if(connectionManager.profiles.length === 0 && settings.enabled) {
-			toastr.warning("No saved connection profiles. stepthink connection & completion presets overrides won't work without at least one saved profile")
 			return;
 		}
 		updateConnectionProfileDropdown();
@@ -385,8 +384,9 @@ function initializeOverridesDropdowns() {
 			actualSelectedProfile = connectionManager.profiles.find(x => x.name === settings.selectedProfile);
 			settings.selectedProfileApi = actualSelectedProfile.api;
 			settings.selectedProfileMode = actualSelectedProfile.mode;
-			}
-		console.log("Selected profile:", { actualSelectedProfile, settings });
+		}
+
+        console.log("Selected profile:", { actualSelectedProfile, settings });
 		updateCompletionPresetsDropdown();
 	} catch(e) {
 		console.log(e)
@@ -413,6 +413,8 @@ function onConnectionProfileSelectChange() {
 		settings.selectedProfileApi = actualSelectedProfile.api;
 		settings.selectedProfileMode = actualSelectedProfile.mode;
 	}
+
+    settings.selectedCompletionPreset = "current";
 
 
 	console.log("Selected profile:", { selectedProfile, settings });
